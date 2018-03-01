@@ -12,6 +12,8 @@
 		* So pressing q makes the fist and second springs on the top contract, pressing w makes the third and fourth springs contract etc.
 		* Keys a to ; control the bottom row
 
+* The goal is to touch the red target points as many times as possible. This is also what the neural network will be trained up to do over time. 
+
 * Running this requires Pygame to run, which can be obtained by running 'pip install pygame'
 	* If you do not have pip run 'sudo easy_install pip'
 		

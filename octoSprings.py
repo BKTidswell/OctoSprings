@@ -3,9 +3,11 @@ import random
 import pygame
 
 #Sets up the pygame screen
+pygame.init()
 (width, height) = (800, 600)
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('OctoSprings')
+font = pygame.font.Font(None, 40)
 
 #These set global varibles
 #These first 4 set the geometry of the arm
@@ -21,6 +23,15 @@ shinkMod = 0.95
 #Currently it stays in place after moving and is not effected by gravity 
 # or the like
 dampCons = 0.1
+
+def makeTarget():
+	#Makes a target that is touchable by the arm
+	x = random.randint(200,450)
+	if(random.random() > 0.5):
+		y = random.randint(150,250)
+	else:
+		y = random.randint(350,450)
+	return(x,y)
 
 def addVectors((angle1, length1), (angle2, length2)):
 	#Returns the sum of two vectors
@@ -44,6 +55,27 @@ def calcDist(Point1,Point2):
 	d = math.sqrt((x1-x2)**2+(y1-y2)**2)
 
 	return d
+
+def gotTarget(target,tip):
+	tipXs = []
+	tipYs = []
+
+	targetX = target[0]
+	targetY = target[1]
+
+	for t in tip:
+		tipXs.append(t.x)
+		tipYs.append(t.y)
+
+	maxX = max(tipXs)
+	minX = min(tipXs)
+	maxY = max(tipYs)
+	minY = min(tipYs)
+
+	if (minX < targetX < maxX) and (minY < targetY < maxY):
+		return True
+	else:
+		return False
 
 class MassPoint:
 	#This class defines the mass point objects that define the arm
@@ -101,57 +133,60 @@ class Spring:
 		if self.length < self.origLength:
 			self.length += 0.5
 
-#This defines the points for the first two points
-topY = height/2 - segTall/2
-bottomY = height/2 + segTall/2
+def setUp():
+	#This defines the points for the first two points
+	topY = height/2 - segTall/2
+	bottomY = height/2 + segTall/2
 
-#These are the points on the arm that don't move
-anchors = [MassPoint((0,topY),size =5),MassPoint((0,bottomY),size = 5)]
+	#These are the points on the arm that don't move
+	anchors = [MassPoint((0,topY),size =5),MassPoint((0,bottomY),size = 5)]
 
-#arrays for points and springs
-points = []
-springs = []
+	#arrays for points and springs
+	points = []
+	springs = []
 
-for x in range(numSegs):
-	#Determines the height of the new segment based on the shrink modifier
-	newSegLen = (segTall/2)*(shinkMod**(x+1))
+	for x in range(numSegs):
+		#Determines the height of the new segment based on the shrink modifier
+		newSegLen = (segTall/2)*(shinkMod**(x+1))
 
-	#Determines the new top and bottom for points
-	topY = height/2 - newSegLen
-	bottomY = height/2 + newSegLen
+		#Determines the new top and bottom for points
+		topY = height/2 - newSegLen
+		bottomY = height/2 + newSegLen
 
-	#Creates new top and bottom points
-	newUpPoint = MassPoint((segWide*(x+1),topY))
-	newDownPoint = MassPoint((segWide*(x+1),bottomY))
+		#Creates new top and bottom points
+		newUpPoint = MassPoint((segWide*(x+1),topY))
+		newDownPoint = MassPoint((segWide*(x+1),bottomY))
 
-	#if it is the first set of points the anchors are the points
-	# toa attach to. Otherwise use the last points in the array.
-	if x == 0:
-		oldUpPoint = anchors[0]
-		oldDownPoint = anchors[1]
-	else:
-		oldUpPoint = points[-2]
-		oldDownPoint = points[-1]
-	
-	#Makes a new spring on top between old and new top points
-	upSpring = Spring(oldUpPoint,newUpPoint)
-	#Makes new spring between top and bottom new points.
-	midSpring = Spring(newUpPoint,newDownPoint,length = bottomY-topY)
-	#Makes new spring on bottom between old and new bottom points
-	downSpring = Spring(oldDownPoint,newDownPoint)
-	#Makes a spring going top to bottom between old and new points. Is stronger for support
-	top2botSpring = Spring(oldUpPoint,newDownPoint,length = calcDist(oldUpPoint,newDownPoint),strength=2)
-	#Makes a spring going bottom to top between old and new points. Is stronger for support
-	bot2tobSpring = Spring(oldDownPoint,newUpPoint,length = calcDist(oldDownPoint,newUpPoint),strength=2)
+		#if it is the first set of points the anchors are the points
+		# toa attach to. Otherwise use the last points in the array.
+		if x == 0:
+			oldUpPoint = anchors[0]
+			oldDownPoint = anchors[1]
+		else:
+			oldUpPoint = points[-2]
+			oldDownPoint = points[-1]
+		
+		#Makes a new spring on top between old and new top points
+		upSpring = Spring(oldUpPoint,newUpPoint)
+		#Makes new spring between top and bottom new points.
+		midSpring = Spring(newUpPoint,newDownPoint,length = bottomY-topY,strength=2)
+		#Makes new spring on bottom between old and new bottom points
+		downSpring = Spring(oldDownPoint,newDownPoint)
+		#Makes a spring going top to bottom between old and new points. Is stronger for support
+		top2botSpring = Spring(oldUpPoint,newDownPoint,length = calcDist(oldUpPoint,newDownPoint),strength=2)
+		#Makes a spring going bottom to top between old and new points. Is stronger for support
+		bot2tobSpring = Spring(oldDownPoint,newUpPoint,length = calcDist(oldDownPoint,newUpPoint),strength=2)
 
-	#Appends all points and spring to their arrays
-	points.append(newUpPoint)
-	points.append(newDownPoint)
-	springs.append(upSpring)
-	springs.append(midSpring)
-	springs.append(downSpring)
-	springs.append(top2botSpring)
-	springs.append(bot2tobSpring)
+		#Appends all points and spring to their arrays
+		points.append(newUpPoint)
+		points.append(newDownPoint)
+		springs.append(upSpring)
+		springs.append(midSpring)
+		springs.append(downSpring)
+		springs.append(top2botSpring)
+		springs.append(bot2tobSpring)
+
+	return [anchors,springs,points]
 
 #Makes it run 
 running = True
@@ -162,6 +197,12 @@ minLen = segWide/2
 #Sets the keys for moving the arm
 upKeys = [pygame.K_q,pygame.K_w,pygame.K_e,pygame.K_r,pygame.K_t,pygame.K_y,pygame.K_u,pygame.K_i,pygame.K_o,pygame.K_p]
 downKeys = [pygame.K_a,pygame.K_s,pygame.K_d,pygame.K_f,pygame.K_g,pygame.K_h,pygame.K_j,pygame.K_k,pygame.K_l,pygame.K_SEMICOLON]
+
+(anchors,springs,points) = setUp()
+
+targetPoint = makeTarget()
+tip = [points[-1],points[-2],points[-3],points[-4]]
+score = 0
 
 #Pygame running loop
 while running:
@@ -177,7 +218,7 @@ while running:
 		#segNum is to have each key control 2 segments
 		segNum = i*2
 		#If upKeys i is pressed.....
-	 	if upActive[i]==1:#keys[upKeys[i]]:
+	 	if keys[upKeys[i]]:
 	 		#If the springs are not too small....
 	 		if(springs[segNum*5].length > minLen):
 	 			#Then shrink them by moveAmount
@@ -192,7 +233,7 @@ while running:
 	 		springs[(segNum+1)*5].restore()
 
 	 	#If downKeys i is pressed.....
-	 	if downActive[i]==1:#keys[downKeys[i]]:
+	 	if keys[downKeys[i]]:
 	 		#If the springs are not too small....
 	 		if(springs[segNum*5+2].length > minLen):
 	 			#Then shrink them by moveAmount
@@ -228,6 +269,21 @@ while running:
 	#Draws anchors
 	for a in anchors:
 		pygame.draw.circle(screen, a.colour, (int(a.x), int(a.y)), a.size, 0)
+
+	#Shows tip in red
+	for t in tip:
+		pygame.draw.circle(screen, (255,0,0), (int(t.x), int(t.y)), t.size, 0)
+
+	pygame.draw.circle(screen, (255,0,0), targetPoint, 3, 0)
+
+	if gotTarget(targetPoint,tip):
+		score += 1
+		targetPoint = makeTarget()
+		(anchors,springs,points) = setUp()
+		tip = [points[-1],points[-2],points[-3],points[-4]]
+
+	text = font.render(str(score), 1, (255,0,0))
+	screen.blit(text,[750,10])
 
 	#Puts all drawing on the screen
 	pygame.display.flip()
