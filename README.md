@@ -1,7 +1,5 @@
 # OctoSprings
-Ben Tidswell
-BIOL 311
-betidswell@vassar.edu
+Ben Tidswell | BIOL 311 | betidswell@vassar.edu
 
 * This is a model of an octopus arm based on the work by Yekutieli et al (2005)
 
