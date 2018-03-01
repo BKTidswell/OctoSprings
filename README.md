@@ -1,6 +1,9 @@
 # OctoSprings
+Ben Tidswell
+BIOL 311
+betidswell@vassar.edu
 
-* This is a model of an octopus arm based on the work by Yekutieli et al 
+* This is a model of an octopus arm based on the work by Yekutieli et al (2005)
 
 * There are 20 segments defined by point masses connected by springs
 	* The springs connect every segment of four points to make a box with an X in the middle
@@ -16,4 +19,8 @@
 
 * Running this requires Pygame to run, which can be obtained by running 'pip install pygame'
 	* If you do not have pip run 'sudo easy_install pip'
+
+
+Yekutieli, Y., Sagiv-Zohar, R., Aharonov, R., Engel, Y., Hochner, B., & Flash, T. (2005). Dynamic model of the octopus arm. I. Biomechanics of the octopus reaching movement. Journal of Neurophysiology, 94(2), 1443-1458.
+
 		

@@ -1,3 +1,12 @@
+#Made by Ben Tidswell
+#For BIOL 311
+#Contact at betidswell@vassar.edu
+
+#Inspired by this paper:
+#Yekutieli, Y., Sagiv-Zohar, R., Aharonov, R., Engel, Y., Hochner, B., & Flash, T. (2005).
+#	 Dynamic model of the octopus arm. I. Biomechanics of the octopus reaching movement. 
+#	 Journal of Neurophysiology, 94(2), 1443-1458.
+
 import math
 import random
 import pygame
